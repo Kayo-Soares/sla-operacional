@@ -9,7 +9,7 @@ arquivo = st.file_uploader("📄 Envie o arquivo de SLA", type=["xlsx"])
 
 if arquivo:
     try:
-        df_sla = pd.read_excel(arquivo)
+        df_sla = pd.read_excel(arquivo, engine="openpyxl")
         df = calcular_sla(df_sla)
 
         responsaveis = sorted(df["Responsavel da base"].unique())
