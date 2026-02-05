@@ -139,6 +139,26 @@ if arquivo:
         df_sla = carregar_sla(BytesIO(arquivo.read()))
         df = calcular_sla(df_sla)
 
+        df["Qtd com tentativa de entrega"] = (
+    pd.to_numeric(df["Qtd com tentativa de entrega"], errors="coerce")
+    .fillna(0))
+        
+        df = (
+    df
+    .sort_values(
+        by=[
+            "Nome da base de entrega",
+            "Qtd com tentativa de entrega",
+            "Qtd a entregar"
+        ],
+        ascending=[True, False, False]
+    )
+    .drop_duplicates(
+        subset=["Nome da base de entrega"],
+        keep="first"
+    )
+)
+
         df = df.merge(BASES_ORGANIZACAO, on="Nome da base de entrega", how="left")
         df = df[df["Responsavel da base"].notna()]
 
@@ -185,8 +205,11 @@ if arquivo:
             )
 
             st.subheader("🔥 Ranking das piores bases")
-            ranking = df_f.sort_values("SLA (%)").head(10)
-
+            ranking = (
+    df_f[df_f["SLA (%)"] < 96]
+    .sort_values("SLA (%)")
+    .head(10)
+)
             st.dataframe(
                 ranking[
                     [
